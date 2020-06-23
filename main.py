@@ -52,37 +52,21 @@ def count_untreatable_rows(fixed_df):
     return untreatable_rows
 
 def reader(filename):
-    fixed_df = pd.read_csv(filename,
-                           names=['VendorID', 'lpep_pickup_datetime', 'Lpep_dropoff_datetime', 'Store_and_fwd_flag',
-                                  'RateCodeID',
-                                  'Pickup_longitude', 'Pickup_latitude', 'Dropoff_longitude', 'Dropoff_latitude',
-                                  'Passenger_count',
-                                  'Trip_distance', 'Fare_amount', 'Extra', 'MTA_tax', 'Tip_amount', 'Tolls_amount',
-                                  'Ehail_fee', 'Total_amount', 'Payment_type', 'Trip_type'],
-                           dtype={"VendorID": str, "lpep_pickup_datetime": str, "Lpep_dropoff_datetime": str,
-                                  "Store_and_fwd_flag": str,
-                                  "RateCodeID": str, "Pickup_longitude": str, "Pickup_latitude": str,
-                                  "Dropoff_longitude": str,
-                                  "Dropoff_latitude": str, "Passenger_count": str, "Trip_distance": str,
-                                  "Fare_amount": str,
-                                  'Extra': str, "MTA_tax": str, "Tip_amount": str, "Tolls_amount": str,
-                                  "Ehail_fee": str,
-                                  "Total_amount": str, "Payment_type": str, "Trip_type": str}, na_values=['na'],
-                           skip_blank_lines=True)
+    fixed_df = pd.read_csv(filename, skip_blank_lines=True)
     fixed_df['Total_amount'] = to_numeric(fixed_df['Total_amount'], errors='coerce')
     fixed_df['Trip_distance'] = to_numeric(fixed_df['Trip_distance'], errors='coerce')
     fixed_df['Lpep_dropoff_datetime'] = to_datetime(fixed_df['Lpep_dropoff_datetime'], errors='coerce')
     fixed_df['lpep_pickup_datetime'] = to_datetime(fixed_df['lpep_pickup_datetime'], errors='coerce')
     fixed_df['time_in_trip'] = fixed_df['Lpep_dropoff_datetime'] - fixed_df['lpep_pickup_datetime']
     fixed_df['time_in_trip'] = fixed_df['time_in_trip'].dt.total_seconds()
+    #print(fixed_df)
     return fixed_df
 
 def reader_2(filename):
     rows = pd.read_csv(filename, usecols=['VendorID', 'lpep_pickup_datetime',
-                                            'Lpep_dropoff_datetime']).reset_index()
-    rows['lpep_pickup_datetime'] = pd.to_datetime(rows['level_1'])
-    rows['Lpep_dropoff_datetime'] = pd.to_datetime(rows['VendorID'])
-    rows['VendorID'] = rows['level_0']
+                                            'Lpep_dropoff_datetime'], sep=',')
+    rows['Lpep_dropoff_datetime'] = to_datetime(rows['Lpep_dropoff_datetime'], errors='coerce')
+    rows['lpep_pickup_datetime'] = to_datetime(rows['lpep_pickup_datetime'], errors='coerce')
     rows = rows[['VendorID', 'lpep_pickup_datetime', 'Lpep_dropoff_datetime']]
     rows['START_DATE'] = rows['lpep_pickup_datetime'].dt.normalize()
     return rows
